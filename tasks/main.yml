@@ -1,0 +1,71 @@
+# Package tweaks
+- name: Faster dnf
+  ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: fastestmirror
+    value: true
+
+- name: Basic packages
+  dnf:
+    name:
+    - autojump
+    - emacs
+    - git
+    - tmux
+    - vim-enhanced
+    state: latest
+
+- name: Unwanted KDE packages
+  dnf:
+    name:
+    - akgregator
+    - kget
+    - kmail
+    - knode
+    - konqueror
+    - kontact
+    state: absent
+
+- name: dnf cleanup
+  dnf:
+    autoremove: yes
+
+- name: Update pre-installed packages
+  dnf:
+    name: '*'
+    state: latest
+
+# ssh lockdown
+- name: Disable Password Authentication
+  lineinfile:
+        path=/etc/ssh/sshd_config
+        regexp='^PasswordAuthentication'
+        line="PasswordAuthentication no"
+        state=present
+        backup=yes
+        validate: /usr/sbin/sshd -t -f %s
+  notify:
+  - restart ssh
+
+- name: Disable ChallengeResponse Authentication
+  lineinfile:
+        path=/etc/ssh/sshd_config
+        regexp='^ChallengeResponseAuthentication'
+        line="ChallengeResponseAuthentication no"
+        state=present
+        backup=yes
+        validate: /usr/sbin/sshd -t -f %s
+  notify:
+  - restart ssh
+
+- name: Disable Root Login
+  lineinfile:
+        dest=/etc/ssh/sshd_config
+        regexp='^PermitRootLogin'
+        line="PermitRootLogin no"
+        state=present
+        backup=yes
+        validate: /usr/sbin/sshd -t -f %s
+  notify:
+    - restart ssh

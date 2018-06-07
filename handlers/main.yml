@@ -1,0 +1,6 @@
+---
+# handlers file for fedora
+- name: restart ssh
+  service:
+    name=sshd
+    state=restarted
