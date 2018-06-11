@@ -25,6 +25,7 @@
     - git
     - restic
     - the_silver_searcher
+    - timew
     - tmux
     - vim-enhanced
     - yadm
