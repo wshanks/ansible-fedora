@@ -1,0 +1,7 @@
+- name: Check copr repo already enabled
+  command: '/usr/bin/dnf repoinfo {{ item.user }}-{{ item.repo }} warn=False'
+  register: copr_check
+  changed_when: "not copr_check.stdout | regex_search('Repo-status\\s*:\\s*enabled')"
+- name: Enable copr repo
+  command: '/usr/bin/dnf -y copr enable {{ item.user }}/{{ item.repo }} warn=False'
+  when: "not copr_check.stdout | regex_search('Repo-status.*:.*enabled')"

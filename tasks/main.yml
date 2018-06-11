@@ -7,21 +7,24 @@
     value: true
 
 - name: External repos
-  block:
-  - name: Check copr repo already enabled
-    command: '/usr/bin/dnf repoinfo thelocehiliosan-yadm warn=False'
-    register: yadm_check
-    changed_when: "not yadm_check.stdout | regex_search('Repo-status\\s*:\\s*enabled')"
-  - name: Enable copr repo
-    command: '/usr/bin/dnf -y copr enable thelocehiliosan/yadm warn=False'
-    when: "not yadm_check.stdout | regex_search('Repo-status.*:.*enabled')"
+  include_role:
+    name: fedora
+    tasks_from: copr
+  loop:
+  - user: thelocehiliosan
+    repo: yadm
+  - user: copart
+    repo: restic
 
 - name: Basic packages
   dnf:
     name:
     - autojump
     - emacs
+    - fzf
     - git
+    - restic
+    - the_silver_searcher
     - tmux
     - vim-enhanced
     - yadm
