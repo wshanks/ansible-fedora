@@ -133,6 +133,15 @@
     # TODO: any easy way to tell when this changed?
     changed_when: false
 
+- name: Partial INI configs
+  include_role:
+    name: fedora
+    tasks_from: partial_ini
+  loop: "{{ query('filetree', 'ini_updates') }}"
+  loop_control:
+    loop_var: ini_item
+  when: ini_item.state == 'file'
+
 # TODO: update existing repo?
 - name: yadm clone
   command: 'yadm clone {{ yadm_repo }}'

@@ -1,0 +1,2 @@
+[plasmashell]
+activate widget 3=Alt+F1\tCtrl+Alt+M,none,Activate Application Launcher Widget

@@ -1,0 +1,11 @@
+[Desktop Entry]
+DefaultProfile=Bash_solarized.profile
+
+[Favorite Profiles]
+Favorites=Bash_solarized.profile
+
+[KonsoleWindow]
+ShowMenuBarByDefault=false
+
+[TabBar]
+TabBarVisibility=ShowTabBarWhenNeeded

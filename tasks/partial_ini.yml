@@ -1,0 +1,9 @@
+- name: 'Update {{ ini_item.path }}'
+  ini_file:
+    path: '{{ ansible_env.HOME }}/{{ ini_item.path }}'
+    section: '{{ item.section }}'
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
+    mode: 0600
+    no_extra_spaces: yes
+  loop: "{{ query('iterate_ini', 'ini_updates/' + ini_item.path) }}"
