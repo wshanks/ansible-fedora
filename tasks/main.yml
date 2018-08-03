@@ -132,3 +132,16 @@
         executable: /bin/bash
     # TODO: any easy way to tell when this changed?
     changed_when: false
+
+# TODO: update existing repo?
+- name: yadm clone
+  command: 'yadm clone {{ yadm_repo }}'
+  when: yadm_repo is defined
+  args:
+      creates: '{{ ansible_env.HOME }}/.yadm'
+
+- name: pyadm clone
+  command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.pyadm {{ pyadm_repo }}'
+  when: pyadm_repo is defined
+  args:
+      creates: '{{ ansible_env.HOME }}/.pyadm'
