@@ -1,0 +1,41 @@
+- name: Widget dir
+  tempfile:
+    state: directory
+    suffix: kde_widget
+  register: widget_dir
+  changed_when: False
+
+- name: Widget clone
+  git:
+    repo: '{{ widget.repo }}'
+    dest: '{{ widget_dir.path }}'
+  changed_when: False
+
+- name: Check for old widget
+  command: 'kpackagetool5 -t Plasma/Applet --show {{ widget.name }}'
+  register: widget_info
+  ignore_errors: yes
+  changed_when: False
+
+# TODO: Need to check if current install is up to date an skip these
+# steps if so. Currently, these steps are idempotent but unnecessarily
+# uninstall/reinstall the applet.
+- name: Remove old widget
+  command:
+    kpackagetool5 -t Plasma/Applet
+    -r {{ item | regex_replace('Path :', '') | trim }}
+  when: item.strip().startswith('Path :')
+  loop: "{{ widget_info.stdout_lines }}"
+  changed_when: False
+
+- name: Install new widget
+  command: 'kpackagetool5 -t Plasma/Applet -i {{ widget_dir.path }}/package'
+  changed_when: False
+
+- name: Regenerate package index
+  command: kpackagetool5 --generate-index -t Plasma/Applet
+  changed_when: False
+
+  
+
+  

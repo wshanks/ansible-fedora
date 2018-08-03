@@ -1,12 +1,23 @@
 # Package tweaks
 - name: Faster dnf
+  become: yes
+  become_method: sudo
   ini_file:
     path: /etc/dnf/dnf.conf
     section: main
     option: fastestmirror
     value: true
 
+- name: Update pre-installed packages
+  become: yes
+  become_method: sudo
+  dnf:
+    name: '*'
+    state: latest
+
 - name: External repos
+  become: yes
+  become_method: sudo
   include_role:
     name: fedora
     tasks_from: copr
@@ -17,12 +28,18 @@
     repo: restic
 
 - name: Basic packages
+  become: yes
+  become_method: sudo
   dnf:
     name:
     - autojump
+    - cmake
+    - extra-cmake-modules
     - emacs
     - fzf
     - git
+    - git-annex
+    - kf5-plasma-devel
     - restic
     - the_silver_searcher
     - timew
@@ -32,6 +49,8 @@
     state: latest
 
 - name: Unwanted KDE packages
+  become: yes
+  become_method: sudo
   dnf:
     name:
     - akgregator
@@ -43,16 +62,15 @@
     state: absent
 
 - name: dnf cleanup
+  become: yes
+  become_method: sudo
   dnf:
     autoremove: yes
 
-- name: Update pre-installed packages
-  dnf:
-    name: '*'
-    state: latest
-
 # ssh lockdown
 - name: Disable Password Authentication
+  become: yes
+  become_method: sudo
   lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^PasswordAuthentication'
@@ -64,6 +82,8 @@
   - restart ssh
 
 - name: Disable ChallengeResponse Authentication
+  become: yes
+  become_method: sudo
   lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^ChallengeResponseAuthentication'
@@ -75,6 +95,8 @@
   - restart ssh
 
 - name: Disable Root Login
+  become: yes
+  become_method: sudo
   lineinfile:
         dest: /etc/ssh/sshd_config
         regexp: '^PermitRootLogin'
@@ -84,3 +106,29 @@
         validate: /usr/sbin/sshd -t -f %s
   notify:
     - restart ssh
+
+- name: KDE widgets
+  include_role:
+    name: fedora
+    tasks_from: kde_widgets
+  loop:
+  - repo: https://github.com/dfaust/plasma-applet-netspeed-widget
+    name: org.kde.netspeedWidget
+  loop_control:
+    loop_var: widget
+
+- name: Configure Plasma shell
+  block:
+  - tempfile:
+      state: file
+    register: plasma_js
+    changed_when: false
+  - copy:
+      src: configure_plasma_shell.js
+      dest: '{{ plasma_js.path }}'
+    changed_when: false
+  - shell: 'qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$(<{{ plasma_js.path }})"'
+    args:
+        executable: /bin/bash
+    # TODO: any easy way to tell when this changed?
+    changed_when: false
