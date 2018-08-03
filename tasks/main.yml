@@ -154,3 +154,23 @@
   when: pyadm_repo is defined
   args:
       creates: '{{ ansible_env.HOME }}/.pyadm'
+
+- name: conda
+  block:
+  - name: Check conda already installed
+    stat:
+      path: '{{ ansible_env.HOME }}/conda/bin/conda'
+    register: conda_bin
+  - name: Download miniconda
+    get_url:
+      url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+      dest: /tmp/miniconda.sh
+    when: conda_bin.stat.exists == False
+  - name: install miniconda
+    command: 'bash /tmp/miniconda.sh -b -p  {{ ansible_env.HOME }}/conda'
+    args:
+      creates: '{{ ansible_env.HOME }}/conda/bin/conda'
+  - name: update conda
+    command: '{{ ansible_env.HOME }}/conda/bin/conda update -y conda'
+    register: conda_update
+    changed_when: conda_update.stdout is not search("# All requested packages already installed.")
