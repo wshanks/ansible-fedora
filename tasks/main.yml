@@ -40,6 +40,8 @@
     - git
     - git-annex
     - kf5-plasma-devel
+    - npm
+    - python2-devel
     - restic
     - the_silver_searcher
     - timew
@@ -174,3 +176,23 @@
     command: '{{ ansible_env.HOME }}/conda/bin/conda update -y conda'
     register: conda_update
     changed_when: conda_update.stdout is not search("# All requested packages already installed.")
+
+- name: npm
+  block:
+  - name: Set user npm prefix
+    ini_file:
+      path: '{{ ansible_env.HOME }}/.npmrc'
+      section: null
+      option: prefix
+      value: '{{ ansible_env.HOME }}/.local/share/npm'
+      mode: 0770
+      no_extra_spaces: yes
+  - name: Install npm modules
+    npm:
+      name: '{{ item }}'
+      global: yes
+      state: latest
+    loop:
+    - typescript
+    
+    
