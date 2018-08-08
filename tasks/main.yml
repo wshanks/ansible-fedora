@@ -109,6 +109,11 @@
   notify:
     - restart ssh
 
+- name: SSD trim
+  service:
+      name=fstrim.timer
+      enabled=yes
+
 - name: KDE widgets
   include_role:
     name: fedora
