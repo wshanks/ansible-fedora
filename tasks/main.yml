@@ -32,6 +32,7 @@
   become_method: sudo
   dnf:
     name:
+    - ansible
     - autojump
     - cmake
     - extra-cmake-modules
@@ -41,14 +42,28 @@
     - git-annex
     - kf5-plasma-devel
     - npm
+    - okular
     - python2-devel
     - restic
+    - rhythmbox
     - the_silver_searcher
     - timew
     - tmux
     - vim-enhanced
     - yadm
     state: latest
+
+- name: H264
+  become: yes
+  become_method: sudo
+  block:
+  - name: H264
+    command: dnf config-manager --set-enabled fedora-cisco-openh264 warn=False
+    changed_when: False
+  - dnf:
+      name:  
+      - gstreamer1-plugin-openh264
+      - mozilla-openh264
 
 - name: Unwanted KDE packages
   become: yes
@@ -110,6 +125,8 @@
     - restart ssh
 
 - name: SSD trim
+  become: yes
+  become_method: sudo
   service:
       name=fstrim.timer
       enabled=yes
@@ -199,5 +216,47 @@
       state: latest
     loop:
     - typescript
-    
-    
+
+- name: Add the flathub flatpak repository remote to the user installation
+  flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user
+
+- name: Install the flatpaks from flathub for current user
+  flatpak:
+    name: '{{ item }}'
+    state: present
+  loop:
+  - com.visualstudio.code.oss
+  - org.zotero.Zotero
+  - org.inkscape.Inkscape
+  - org.libreoffice.LibreOffice
+  - com.slack.Slack
+  - org.videolan.VLC
+  - org.gtk.Gtk3theme.Arc-Dark
+
+- name: Install vscode
+  become: yes
+  become_method: sudo
+  block:
+  - name: Add repo key
+    rpm_key:
+      state: present
+      key: https://packages.microsoft.com/keys/microsoft.asc
+  - name: Install vscode repo
+    yum_repository:
+      name: visual-studio-code
+      description: Visual Studio Code
+      baseurl: https://packages.microsoft.com/yumrepos/vscode
+      gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+  - name: update dnf cache
+    command: dnf check-update
+    changed_when: False
+  - name: Install vscode
+    dnf:
+      name:
+      - code
+      state: latest
+
