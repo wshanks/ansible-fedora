@@ -39,7 +39,7 @@
     - emacs
     - fzf
     - git
-    - git-annex
+    - git-subtree
     - kf5-plasma-devel
     - npm
     - okular
