@@ -65,5 +65,9 @@ for (i=0; i<panel.widgetIds.length; i++) {
     } else if (widget.type == 'org.kde.plasma.systemmonitor.memory') {
         widget.currentConfigGroup = new Array('General')
         widget.writeConfig('sources', 'mem%2Fphysical%2Fapplication')
+    } else if (widget.type == 'org.kde.plasma.digitalclock') {
+        widget.currentConfigGroup = new Array('Appearance')
+        widget.writeConfig('showDate', 'true')
     }
+
 }
