@@ -32,11 +32,15 @@
   become_method: sudo
   dnf:
     name:
+    - "@Administration Tools"
+    - "@C Development Tools and Libraries"
+    - "@Hardware Support"
     - ansible
     - autojump
     - cmake
     - extra-cmake-modules
     - emacs
+    - firefox
     - fzf
     - git
     - git-subtree
