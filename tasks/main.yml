@@ -44,6 +44,7 @@
     - fzf
     - git
     - git-subtree
+    - keepassxc
     - kf5-plasma-devel
     - npm
     - okular
@@ -51,7 +52,8 @@
     - restic
     - rhythmbox
     - the_silver_searcher
-    - timew
+    - tlp
+    - tlp-rdw
     - tmux
     - vim-enhanced
     - yadm
