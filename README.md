@@ -13,7 +13,7 @@ Example Playbook
 
     - hosts: workstations
       roles:
-         - { role: ansible-fedora }
+         - { role: ansible_fedora }
 
 License
 -------
