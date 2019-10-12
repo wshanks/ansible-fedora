@@ -48,6 +48,8 @@
     - kf5-plasma-devel
     - npm
     - okular
+    - pandoc
+    - patch
     - python2-devel
     - restic
     - rhythmbox
