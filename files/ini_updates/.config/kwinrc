@@ -16,7 +16,7 @@ TabBoxAlternative=false
 [ModifierOnlyShortcuts]
 Alt=
 Control=
-Meta=org.kde.krunner,/App,,display
+Meta=org.kde.kglobalaccel,/component/krunner,,invokeShortcut,run command
 Shift=
 
 [Plugins]
