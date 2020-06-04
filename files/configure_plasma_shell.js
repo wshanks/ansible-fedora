@@ -1,6 +1,6 @@
 // This sets up the panel items/order/settings
 
-widgets = ['org.kde.plasma.kickoff',
+widgets = ['org.kde.plasma.kickerdash',
            'org.kde.plasma.panelspacer',
            'org.kde.plasma.systemmonitor.cpu',
            'org.kde.plasma.systemmonitor.memory',
@@ -68,6 +68,8 @@ for (i=0; i<panel.widgetIds.length; i++) {
     } else if (widget.type == 'org.kde.plasma.digitalclock') {
         widget.currentConfigGroup = new Array('Appearance')
         widget.writeConfig('showDate', 'true')
+    } else if (widget.type == 'org.kde.plasma.kickerdash') {
+        widget.globalShortcut = 'Meta+Space'
     }
 
 }
