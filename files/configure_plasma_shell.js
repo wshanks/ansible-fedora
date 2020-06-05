@@ -8,7 +8,7 @@ widgets = ['org.kde.plasma.kickerdash',
            'org.kde.plasma.systemtray',
            'org.kde.plasma.digitalclock']
 
-while (panelIds.length > 1) {
+while (panelIds.length > 0) {
     panelById(panelIds[panelIds.length - 1]).remove()
 }
 if (panelIds.length == 0) {
