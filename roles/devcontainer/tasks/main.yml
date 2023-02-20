@@ -1,0 +1,97 @@
+# Package tweaks
+- name: Faster dnf
+  become: yes
+  become_method: sudo
+  ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: fastestmirror
+    value: true
+
+- name: Update pre-installed packages
+  become: yes
+  become_method: sudo
+  dnf:
+    name: '*'
+    state: latest
+
+- name: Basic packages
+  become: yes
+  become_method: sudo
+  dnf:
+    name:
+    - "@Administration Tools"
+    - "@C Development Tools and Libraries"
+    - "@Hardware Support"
+    - autojump
+    - cmake
+    - extra-cmake-modules
+    - emacs
+    - fzf
+    - git
+    - npm
+    - pandoc
+    - patch
+    - the_silver_searcher
+    - tmux
+    - vim-enhanced
+    - yadm
+    state: latest
+
+- name: dnf cleanup
+  become: yes
+  become_method: sudo
+  dnf:
+    autoremove: yes
+
+- name: yadm clone
+  command: 'yadm clone {{ yadm_repo }}'
+  when: yadm_repo is defined
+  args:
+      creates: '{{ ansible_env.HOME }}/.yadm'
+
+- name: pyadm clone
+  command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.pyadm {{ pyadm_repo }}'
+  when: pyadm_repo is defined
+  args:
+      creates: '{{ ansible_env.HOME }}/.pyadm'
+
+- name: mamba
+  block:
+  - name: Check mamba already installed
+    stat:
+      path: '{{ ansible_env.HOME }}/.conda/bin/mamba'
+    register: mamba_bin
+  - name: Download mamba
+    get_url:
+      url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+      dest: /tmp/mamba.sh
+    when: mamba_bin.stat.exists == False
+  - name: install mamba
+    command: 'bash /tmp/mamba.sh -b -p  {{ ansible_env.HOME }}/.conda'
+    args:
+      creates: '{{ ansible_env.HOME }}/.conda/bin/mamba'
+    when: mamba_bin.stat.exists == False
+  - name: update mamba
+    command: '{{ ansible_env.HOME }}/.conda/bin/mamba update -y mamba'
+    register: mamba_update
+    changed_when: mamba_update.stdout is not search("# All requested packages already installed.")
+
+- name: npm
+  block:
+  - name: Set user npm prefix
+    ini_file:
+      path: '{{ ansible_env.HOME }}/.npmrc'
+      section: null
+      option: prefix
+      value: '{{ ansible_env.HOME }}/.local/share/npm'
+      mode: 0770
+      no_extra_spaces: yes
+  - name: Install npm modules
+    npm:
+      name: '{{ item }}'
+      global: yes
+      state: latest
+    loop:
+    - typescript
+
