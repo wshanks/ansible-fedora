@@ -2,7 +2,7 @@
 - name: Faster dnf
   become: yes
   become_method: sudo
-  ini_file:
+  community.general.ini_file:
     path: /etc/dnf/dnf.conf
     section: main
     option: fastestmirror
@@ -23,28 +23,52 @@
 
 - name: install yadm
   block:
-  - name: clone yadm
-    ansible.builtin.git:
-      repo: 'https://github.com/TheLocehiliosan/yadm.git'
-      dest: '{{ ansible_env.HOME }}/.local/installs/yadm'
-      version: master
-  - name: link yadm
-    ansible.builtin.file:
-      src: '{{ ansible_env.HOME }}/.local/installs/yadm/yadm'
-      dest: '{{ ansible_evn.HOME }}/bin/yadm
-      state: link
+    - name: clone yadm
+      ansible.builtin.git:
+        repo: 'https://github.com/TheLocehiliosan/yadm.git'
+        dest: '{{ ansible_env.HOME }}/.local/installs/yadm'
+        version: master
+    - name: link yadm
+      ansible.builtin.file:
+        src: '{{ ansible_env.HOME }}/.local/installs/yadm/yadm'
+        dest: '{{ ansible_env.HOME }}/bin/yadm'
+        state: link
 
 - name: yadm clone
-  command: 'yadm clone {{ yadm_repo }}'
-  when: yadm_repo is defined
-  args:
-      creates: '{{ ansible_env.HOME }}/.yadm'
+  block:
+    - name: Check if yadm is already cloned
+      stat:
+        path: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
+      register: yadmrepostat
+    - name: Clone yadm
+      command: 'yadm clone {{ yadm_repo }}'
+      when: yadm_repo is defined and yadmrepostat.stat.exists == False
+      args:
+          creates: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
+    - name: Reset yadm
+      command: 'yadm reset --hard'
+      when: yadm_repo is defined and yadmrepostat.stat.exists == False
 
 - name: pyadm clone
-  command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.pyadm {{ pyadm_repo }}'
-  when: pyadm_repo is defined
-  args:
-      creates: '{{ ansible_env.HOME }}/.pyadm'
+  block:
+    - name: Check if pyadm is already cloned
+      stat:
+        path: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
+      register: pyadmrepostat
+    - name: Make pyadm directory
+      file:
+        path: '{{ ansible_env.HOME }}/.local/share/pyadm'
+        state: directory
+        mode: 0770
+      when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
+    - name: pyadm clone
+      command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm/repo.git {{ pyadm_repo }}'
+      when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
+      args:
+          creates: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
+    - name: Reset pyadm
+      command: 'pyadm reset --hard'
+      when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
 
 # ssh lockdown
 - name: Disable Password Authentication
@@ -93,15 +117,20 @@
       name=fstrim.timer
       enabled=yes
 
-- name: Add the flathub flatpak repository remote to the user installation
-  flatpak_remote:
+# Will fail if remote installed but not enabled until
+# https://github.com/ansible-collections/community.general/pull/5926 is
+# available
+- name: Add the flathub flatpak remote
+  become: yes
+  become_method: sudo
+  community.general.flatpak_remote:
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-    method: user
+    method: system
 
 - name: Install the flatpaks from flathub for current user
-  flatpak:
+  community.general.flatpak:
     name: '{{ item }}'
     state: present
   loop:
@@ -112,3 +141,17 @@
   - org.mozilla.firefox
   - com.slack.Slack
   - org.zotero.Zotero
+
+- name: Provision a development container
+  block:
+    - name: Check for container existence
+      ansible.builtin.command: 'podman container inspect {{ devcontainer_name }}'
+      changed_when: False
+      register: devcontainer_status
+      failed_when:
+        - devcontainer_status.rc != 0
+        - '"no such container"  not in devcontainer_status.stderr'
+    - name: Create dev container
+      # Could put more arguments here, but defaulting to the host Fedora version is fine
+      ansible.builtin.command: 'toolbox create {{ devcontainer_name }}'
+      when: devcontainer_status.rc != 0

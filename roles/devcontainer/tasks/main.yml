@@ -20,9 +20,7 @@
   become_method: sudo
   dnf:
     name:
-    - "@Administration Tools"
     - "@C Development Tools and Libraries"
-    - "@Hardware Support"
     - autojump
     - cmake
     - extra-cmake-modules
@@ -32,10 +30,11 @@
     - npm
     - pandoc
     - patch
+    - python3-devel
     - the_silver_searcher
+    - timew
     - tmux
     - vim-enhanced
-    - yadm
     state: latest
 
 - name: dnf cleanup
@@ -43,18 +42,6 @@
   become_method: sudo
   dnf:
     autoremove: yes
-
-- name: yadm clone
-  command: 'yadm clone {{ yadm_repo }}'
-  when: yadm_repo is defined
-  args:
-      creates: '{{ ansible_env.HOME }}/.yadm'
-
-- name: pyadm clone
-  command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.pyadm {{ pyadm_repo }}'
-  when: pyadm_repo is defined
-  args:
-      creates: '{{ ansible_env.HOME }}/.pyadm'
 
 - name: mamba
   block:
@@ -95,3 +82,27 @@
     loop:
     - typescript
 
+- name: Set up vim plugins
+  block:
+    - name: Check if vim-plug is installed
+      stat:
+        path: '{{ ansible_env.HOME }}/.vim/autoload/plug.vim'
+      register: vimplug
+    - name: Create vim autload directory
+      file:
+        path: '{{ ansible_env.HOME }}/.vim/autoload'
+        state: directory
+        mode: 0770
+    - name: Download vim-plug
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        dest: '{{ ansible_env.HOME }}/.vim/autoload/plug.vim'
+        mode: 0660
+      when: not vimplug.stat.exists
+    - name: Check if vim-plug plugged directory exists
+      stat:
+        path: '{{ ansible_env.HOME }}/.vim/plugged'
+      register: vimplugged
+    - name: Install vim plugins
+      command: 'vim -es -u {{ ansible_env.HOME }}/.vim/vimrc -i NONE -c "PlugInstall" -c "qa"'
+      when: not vimplugged.stat.exists
