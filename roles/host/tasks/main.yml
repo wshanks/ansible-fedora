@@ -217,3 +217,27 @@
       # Could put more arguments here, but defaulting to the host Fedora version is fine
       ansible.builtin.command: 'toolbox create {{ devcontainer_name }}'
       when: devcontainer_status.rc != 0
+
+# - name: Set up gnome settings
+- name: dark theme
+  community.general.dconf:
+    key: "/org/gnome/desktop/interface/color-scheme"
+    value: "'prefer-dark'"
+    state: present
+
+- name: caps lock
+  community.general.dconf:
+    key: "/org/gnome/desktop/input-sources/xkb-options"
+    value: "['caps:ctrl_modifier']"
+    state: present
+
+- name: touchpad
+  community.general.dconf:
+    key: "/org/gnome/desktop/peripherals/touchpad/{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - key: "'tap-to-click'"
+      value: true
+    - key: "'two-finger-scrolling-enabledg"
+      value: true
