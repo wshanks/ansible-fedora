@@ -15,6 +15,28 @@
     name: '*'
     state: latest
 
+- name: Basic packages
+  become: yes
+  become_method: sudo
+  dnf:
+    name:
+      # No flatpak for tweaks
+      - gnome-tweaks
+      - igt-gpu-tools
+      # tmux in the container has trouble with terminal windows resizing and
+      # makes it hard to pop up to a shell in the host
+      - tmux
+    state: latest
+
+- name: Unneeded packages
+  become: yes
+  become_method: sudo
+  dnf:
+    name:
+    - gnome-shell-extension-appindicator
+    - gnome-shell-extension-background-logo
+    state: absent
+
 - name: dnf cleanup
   become: yes
   become_method: sudo
