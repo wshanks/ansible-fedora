@@ -63,7 +63,7 @@
         path: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
       register: yadmrepostat
     - name: Clone yadm
-      command: 'yadm clone {{ yadm_repo }}'
+      command: 'yadm clone --checkout {{ yadm_repo }}'
       when: yadm_repo is defined and yadmrepostat.stat.exists == False
       args:
           creates: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
@@ -84,10 +84,10 @@
         mode: 0770
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
     - name: pyadm clone
-      command: 'yadm clone --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm/repo.git {{ pyadm_repo }}'
+      command: 'yadm clone --checkout --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm --yadm-data {{ ansible_env.HOME }}/.local/share/pyadm {{ pyadm_repo }}'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
       args:
-          creates: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
+        creates: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
     - name: Reset pyadm
       command: 'pyadm reset --hard'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
