@@ -152,17 +152,57 @@
     method: system
 
 - name: Install the flatpaks from flathub for current user
-  community.general.flatpak:
-    name: '{{ item }}'
-    state: present
-  loop:
-  - org.gnome.Evolution
-  - org.inkscape.Inkscape
-  - org.keepassxc.KeePassXC
-  - org.libreoffice.LibreOffice
-  - org.mozilla.firefox
-  - com.slack.Slack
-  - org.zotero.Zotero
+  block:
+    - name: Define flatpaks to install
+      ansible.builtin.set_fact:
+        flatpaks:
+          - name: org.inkscape.Inkscape
+          - name: org.keepassxc.KeePassXC
+          - name: org.libreoffice.LibreOffice
+          - name: org.zotero.Zotero
+            theme: true
+          - name: org.gnome.Extensions
+          - name: org.pulseaudio.pavucontrol
+            theme: true
+        flatpak_theme: "Adwaita:Dark"
+    - name: 'Install flatpaks'
+      community.general.flatpak:
+        name: '{{ item.name }}'
+        state: present
+        remote: flathub
+      loop: "{{ flatpaks }}"
+    - name: Find flatpaks that need theming
+      command:
+        cmd: 'flatpak override --user --show {{ item.name }}'
+      register: flatpak_overrides
+      loop: "{{ flatpaks }}"
+      changed_when: false
+    - name: 'Override flatpak themes'
+      ansible.builtin.command:
+        cmd: 'flatpak override --user --env=GTK_THEME={{ flatpak_theme }} {{ item[0].name }}'
+      when: 'item[0].get("theme") and flatpak_theme not in item[1].stdout'
+      loop: "{{ flatpaks | zip(flatpak_overrides.results) | list }}"
+
+- name: Install firefox flatpak
+  block:
+    - name: Install firefox
+      community.general.flatpak:
+        name: org.mozilla.firefox
+        state: present
+        remote: flathub
+    # Here we mangle the runtime name of Firefox into the ffmpeg runtime form
+    # in order to match the version number
+    - name: Look up Firefox runtime
+      command: flatpak info org.mozilla.firefox --show-runtime
+      register: firefox_runtime
+    - name: Install ffmpeg for firefox
+      community.general.flatpak:
+        name: "{{ firefox_runtime.stdout|replace('org.freedesktop.Platform','runtime/org.freedesktop.Platform.ffmpeg-full')}}"
+        remote: flathub
+        state: present
+    - name: Firefox flatpak as default browser
+      ansible.builtin.command:
+        cmd: xdg-settings set default-web-browser org.mozilla.firefox.desktop
 
 - name: Provision a development container
   block:
