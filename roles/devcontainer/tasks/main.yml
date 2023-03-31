@@ -27,10 +27,12 @@
     - extra-cmake-modules
     - emacs
     - fzf
+    - gh
     - git
     - npm
     - pandoc
     - patch
+    - pv
     - python3-devel
     - rustc
     - the_silver_searcher
