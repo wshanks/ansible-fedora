@@ -23,6 +23,7 @@
       # No flatpak for tweaks
       - gnome-tweaks
       - igt-gpu-tools
+      - podman-compose
       # tmux in the container has trouble with terminal windows resizing and
       # makes it hard to pop up to a shell in the host
       - tmux
@@ -241,3 +242,25 @@
       value: true
     - key: "'two-finger-scrolling-enabledg"
       value: true
+
+# Services
+- name: local http server
+  ansible.builtin.systemd:
+    name: localhttp
+    state: started
+    enabled: true
+    scope: user
+
+
+# - name: Set up gnome terminal
+# > [org/gnome/terminal/legacy/profiles:]
+# > default='798fbb90-70d3-4130-ab9f-12b5c4aafe3c'
+# > list=['b1dcc9dd-5262-4d8d-a863-c897e6d979b9', '798fbb90-70d3-4130-ab9f-12b5c4aafe3c']
+# > 
+# > [org/gnome/terminal/legacy/profiles:/:798fbb90-70d3-4130-ab9f-12b5c4aafe3c]
+# > background-color='rgb(0,43,54)'
+# > foreground-color='rgb(131,148,150)'
+# > use-theme-colors=false
+# > visible-name='solarized'
+ 
+
