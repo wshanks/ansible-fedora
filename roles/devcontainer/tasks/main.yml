@@ -117,3 +117,16 @@
     - name: Install vim plugins
       command: 'vim -es -u {{ ansible_env.HOME }}/.vim/vimrc -i NONE -c "PlugInstall" -c "qa"'
       when: not vimplugged.stat.exists
+
+- name: timewarrior plugin
+  block:
+    - name: Make timewarrior directories
+      ansible.builtin.file:
+        path: '{{ ansible_env.HOME }}/.timewarrior/weekly'
+        mode: '0750'
+        state: directory
+    - name: Get timewarrior extension
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/wshanks/timewarrior-weekly/master/weekly.py
+        dest: '{{ ansible_env.HOME }}/.timewarrior/extensions/weekly.py'
+        mode: '0750'
