@@ -216,7 +216,7 @@
         - '"no such container"  not in devcontainer_status.stderr'
     - name: Create dev container
       # Could put more arguments here, but defaulting to the host Fedora version is fine
-      ansible.builtin.command: 'toolbox create {{ devcontainer_name }}'
+      ansible.builtin.command: 'toolbox --assumeyes create {{ devcontainer_name }}'
       when: devcontainer_status.rc != 0
 
 # - name: Set up gnome settings
