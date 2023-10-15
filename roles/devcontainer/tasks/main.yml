@@ -43,6 +43,7 @@
     - python3-devel
     - rclone
     - rustc
+    - telnet
     - the_silver_searcher
     - timew
     - vim-enhanced
