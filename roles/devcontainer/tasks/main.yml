@@ -25,10 +25,11 @@
     - cargo
     - cmake
     - extra-cmake-modules
-    # NOTE: before running emacs, make sure .emacs.d holds only init.el. The
-    # other files in .emacs.d include installed packages and old history. It is
-    # cleaner to reinstall. Keeping the old history can be annoying if file
-    # paths are different on the new system.
+    # NOTE: before running emacs for the first time on a new system, make sure
+    # .emacs.d holds only init.el. The other files in .emacs.d include
+    # installed packages and old history. It is cleaner to reinstall. Keeping
+    # the old history can be annoying if file paths are different on the new
+    # system.
     - emacs
     - fzf
     - gh
@@ -36,8 +37,6 @@
     - npm
     - pandoc
     - patch
-    # Kind of useless; perhaps should just alias podman to flatpak-spawn --host podman
-    # - podman
     - pv
     - python-unversioned-command
     - python3-devel
@@ -46,6 +45,7 @@
     - telnet
     - the_silver_searcher
     - timew
+    - tmux
     - vim-enhanced
     state: latest
 
