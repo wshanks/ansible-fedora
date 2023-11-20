@@ -1,1 +1,5 @@
 devcontainer_name: dev
+# Can be updated by running tools/update_docker.sh. TODO: look this up automatically?
+docker_version: '24.0.7'
+docker_bin_path: '{{ ansible_env.HOME }}/.local/docker/bin'
+docker_buildx_version: '0.12.0'

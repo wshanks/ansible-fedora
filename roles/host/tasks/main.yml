@@ -20,6 +20,8 @@
   become_method: sudo
   dnf:
     name:
+      # rootless docker
+      - fuse-overlayfs
       # No flatpak for tweaks
       - gnome-tweaks
       - igt-gpu-tools
@@ -250,6 +252,78 @@
     state: started
     enabled: true
     scope: user
+
+- name: Rootless docker
+  block:
+    - name: Create docker bin directory
+      ansible.builtin.file:
+        path: '{{ docker_bin_path }}'
+        state: directory
+        mode: u=rwx
+
+    - name: Create docker plugin directory
+      ansible.builtin.file:
+        path: '{{ ansible_env.HOME }}/.docker/cli-plugins'
+        state: directory
+        mode: u=rwx
+
+    - name: Check if docker binaries already present
+      stat:
+        path: '{{ docker_bin_path }}/docker'
+      register: dockerbinstat
+
+    - name: Download docker core
+      ansible.builtin.unarchive:
+        src: 'https://download.docker.com/linux/static/stable/x86_64/docker-{{ docker_version }}.tgz'
+        dest: '{{ docker_bin_path }}'
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      when: dockerbinstat.stat.exists == False
+
+    - name: Download docker rootless extras
+      ansible.builtin.unarchive:
+        src: 'https://download.docker.com/linux/static/stable/x86_64/docker-rootless-extras-{{ docker_version }}.tgz'
+        dest: '{{ docker_bin_path }}'
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+      when: dockerbinstat.stat.exists == False
+
+    - name: Check if docker buildx binary already present
+      stat:
+        path: '{{ ansible_env.HOME }}/.docker/cli-plugins/docker-buildx'
+      register: buildxstat
+
+    - name: Download buildx
+      ansible.builtin.get_url:
+        url: https://github.com/docker/buildx/releases/download/v{{ docker_buildx_version }}/buildx-v{{ docker_buildx_version }}.linux-amd64
+        dest: '{{ ansible_env.HOME }}/.docker/cli-plugins/docker-buildx'
+        mode: 0750
+      when: buildxstat.stat.exists == False
+
+    - name: Find docker binaries
+      ansible.builtin.find:
+        paths: '{{ docker_bin_path }}'
+      register: docker_binaries
+
+    - name: Link docker binaries into PATH
+      ansible.builtin.file:
+        src: '{{ item.path }}'
+        path: '{{ ansible_env.HOME }}/bin/{{ item.path | basename }}'
+        state: link
+      loop: "{{ docker_binaries.files | selectattr('xusr') }}"
+
+    - name: Install docker service
+      ansible.builtin.template:
+        src: docker_rootless.service.j2
+        dest: '{{ ansible_env.HOME }}/.config/systemd/user/docker_rootless.service'
+
+    - name: Start docker
+      ansible.builtin.systemd:
+        name: docker_rootless
+        state: started
+        enabled: true
+        scope: user
+  tags: docker
 
 
 # - name: Set up gnome terminal
