@@ -58,6 +58,7 @@
         src: '{{ ansible_env.HOME }}/.local/installs/yadm/yadm'
         dest: '{{ ansible_env.HOME }}/bin/yadm'
         state: link
+  tags: yadm
 
 - name: yadm clone
   block:
@@ -73,6 +74,7 @@
     - name: Reset yadm
       command: 'yadm reset --hard'
       when: yadm_repo is defined and yadmrepostat.stat.exists == False
+  tags: yadm
 
 - name: pyadm clone
   block:
@@ -94,6 +96,7 @@
     - name: Reset pyadm
       command: 'pyadm reset --hard'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
+  tags: yadm
 
 # ssh lockdown
 - name: Disable Password Authentication
