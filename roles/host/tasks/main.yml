@@ -84,7 +84,9 @@
   block:
     - name: Ensure pyadm address is in ssh known_hosts
       ansible.builtin.known_hosts:
-        name: "{{ pyadm_repo | urlsplit('hostname') }}"
+        # Pull out the string between @ and : in git@github.com:repo...
+        name: "{{ pyadm_repo | regex_search('@(.*):', '\\1') | first }}"
+        key: "{{ pyadm_host_key }}"
     - name: Check if pyadm is already cloned
       stat:
         path: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
