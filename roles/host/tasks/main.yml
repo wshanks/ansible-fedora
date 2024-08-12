@@ -48,6 +48,10 @@
 
 - name: install yadm
   block:
+    - name: Ensure bin directory exists
+      ansible.builtin.file:
+        path: '{{ ansible_env.HOME }}/bin'
+        state: directory
     - name: clone yadm
       ansible.builtin.git:
         repo: 'https://github.com/TheLocehiliosan/yadm.git'
@@ -78,6 +82,9 @@
 
 - name: pyadm clone
   block:
+    - name: Ensure pyadm address is in ssh known_hosts
+      ansible.builtin.known_hosts:
+        name: "{{ pyadm_repo | urlsplit('hostname') }}"
     - name: Check if pyadm is already cloned
       stat:
         path: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
@@ -94,7 +101,7 @@
       args:
         creates: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
     - name: Reset pyadm
-      command: 'pyadm reset --hard'
+      command: 'yadm reset --hard --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm --yadm-data {{ ansible_env.HOME }}/.local/share/pyadm'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
   tags: yadm
 
