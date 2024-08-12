@@ -23,6 +23,7 @@
     - "@C Development Tools and Libraries"
     - autojump
     - cargo
+    - clippy
     - cmake
     - extra-cmake-modules
     # NOTE: before running emacs for the first time on a new system, make sure
@@ -42,6 +43,7 @@
     - python3-devel
     - rclone
     - rustc
+    - rustfmt
     - telnet
     - the_silver_searcher
     - timew
