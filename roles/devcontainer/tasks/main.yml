@@ -79,6 +79,21 @@
     changed_when: mamba_update.stdout is not search("# All requested packages already installed.")
   tags: mamba
 
+- name: pixi
+  block:
+  - name: Pixi home and bin directories
+    file:
+      path: '{{ ansible_env.HOME }}/.pixi/bin'
+      state: directory
+      mode: 0770
+  - name: Download and install pixi
+    unarchive:
+      src: "https://github.com/prefix-dev/pixi/releases/latest/download/pixi-{{ ansible_architecture }}-unknown-linux-musl.tar.gz"
+      dest: '{{ ansible_env.HOME }}/.pixi/bin'
+      remote_src: yes
+      creates: '{{ ansible_env.HOME }}/.pixi/bin/pixi'
+  tags: pixi
+
 - name: npm
   block:
   - name: Set user npm prefix
