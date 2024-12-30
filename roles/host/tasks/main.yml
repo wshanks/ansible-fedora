@@ -261,12 +261,17 @@
       value: true
 
 # Services
-- name: local http server
+- name: user services
   ansible.builtin.systemd:
-    name: localhttp
+    name: "{{ item }}"
     state: started
     enabled: true
     scope: user
+  loop:
+    - localhttp
+    - jupyter
+    # TODO: start toolbox-emacs-server in dev container, needs to be done after
+    # dev container set up which is run after this role.
 
 - name: Rootless docker
   block:
