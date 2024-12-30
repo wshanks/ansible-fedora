@@ -270,8 +270,18 @@
   loop:
     - localhttp
     - jupyter
-    # TODO: start toolbox-emacs-server in dev container, needs to be done after
-    # dev container set up which is run after this role.
+
+- name: user services that require devcontainer
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    scope: user
+  loop:
+    - toolbox-emacs-server
+  tags:
+    - devcontainer_running
+
 
 - name: Rootless docker
   block:
