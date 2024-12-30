@@ -83,15 +83,19 @@
   block:
   - name: Pixi home and bin directories
     file:
-      path: '{{ ansible_env.HOME }}/.pixi/bin'
+      path: '{{ ansible_env.HOME }}/.local/share/pixi/bin'
       state: directory
       mode: 0770
   - name: Download and install pixi
     unarchive:
       src: "https://github.com/prefix-dev/pixi/releases/latest/download/pixi-{{ ansible_architecture }}-unknown-linux-musl.tar.gz"
-      dest: '{{ ansible_env.HOME }}/.pixi/bin'
+      dest: '{{ ansible_env.HOME }}/.local/share/pixi/bin'
       remote_src: yes
-      creates: '{{ ansible_env.HOME }}/.pixi/bin/pixi'
+      creates: '{{ ansible_env.HOME }}/.local/share/pixi/bin/pixi'
+  - name: Sync pixi tools
+    ansible.builtin.command:
+      cmd: "pixi global sync"
+      creates: "{{ ansible_env.HOME }}/.local/share/pixi/envs"
   tags: pixi
 
 - name: npm
