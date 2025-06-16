@@ -78,6 +78,8 @@
     command: '{{ ansible_env.HOME }}/.conda/bin/mamba update -y mamba'
     register: mamba_update
     changed_when: mamba_update.stdout is not search("# All requested packages already installed.")
+    environment:
+      MAMBA_ROOT_PREFIX: '{{ ansible_env.HOME }}/.conda'
   tags: mamba
 
 - name: pixi
