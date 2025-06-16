@@ -35,6 +35,7 @@
     - fzf
     - gh
     - git
+    - neovim
     - npm
     - pandoc
     - patch
