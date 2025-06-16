@@ -18,9 +18,9 @@
 - name: Basic packages
   become: yes
   become_method: sudo
-  dnf:
+  ansible.builtin.dnf:
     name:
-    - "@C Development Tools and Libraries"
+    - "@c-development"
     - autojump
     - cargo
     - clippy
