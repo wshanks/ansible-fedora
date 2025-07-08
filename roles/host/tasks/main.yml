@@ -154,6 +154,25 @@
       name=fstrim.timer
       enabled=yes
 
+# Install nerd fonts
+- name: Install Adwaita nerd fonts
+  block:
+    - name: Create fonts directory
+      ansible.builtin.file:
+        path: /usr/loca/share/fonts
+        state: directory
+        mode: u=rwx,g=rx,o=rx
+      become: yes
+      become_method: sudo
+    - name: Install font
+      ansible.builtin.unarchive:
+        src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/AdwaitaMono.tar.xz
+        dest: /usr/local/share/fonts
+        creates: /usr/loca/share/fonts/AdwaitaMonoNerdFontMono-Regular.ttf
+      become: yes
+      become_method: sudo
+
+
 # Will fail if remote installed but not enabled until
 # https://github.com/ansible-collections/community.general/pull/5926 is
 # available
