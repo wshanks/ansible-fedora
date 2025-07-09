@@ -43,6 +43,7 @@
     - python-unversioned-command
     - python3-devel
     - rclone
+    - rust-analyzer
     - rustc
     - rustfmt
     - telnet
