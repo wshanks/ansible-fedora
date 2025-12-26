@@ -220,6 +220,14 @@
       when: 'item[0].get("theme") and flatpak_theme not in item[1].stdout'
       loop: "{{ flatpaks | zip(flatpak_overrides.results) | list }}"
 
+- name: Ensure KeePassXC theme is dark
+  ansible.builtin.ini_file:
+    path: "{{ ansible_env.HOME }}/.var/org.keepassxc.KeePassXC/config/keepassxc/keepassxc.ini"
+    section: "GUI"
+    option: "ApplicationTheme"
+    value: "dark"
+    mode: "0644"
+
 - name: Install firefox flatpak
   block:
     - name: Install firefox
