@@ -21,7 +21,6 @@
   ansible.builtin.dnf:
     name:
     - "@c-development"
-    - autojump
     - cargo
     - clippy
     - cmake
@@ -32,25 +31,18 @@
     # the old history can be annoying if file paths are different on the new
     # system.
     - emacs
-    - fzf
-    - gh
     - git
     - neovim
     - npm
     - pandoc
     - patch
     - pv
-    - python-unversioned-command
-    - python3-devel
-    - rclone
     - rust-analyzer
     - rustc
     - rustfmt
     - telnet
-    - the_silver_searcher
     - timew
     - tmux
-    - vim-enhanced
     state: latest
 
 - name: dnf cleanup
@@ -120,29 +112,29 @@
     loop:
     - typescript
 
-- name: Set up vim plugins
+- name: Set up nvim plugins
   block:
     - name: Check if vim-plug is installed
       stat:
-        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload/plug.vim'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/nvim/site/autoload/plug.vim'
       register: vimplug
-    - name: Create vim autload directory
+    - name: Create nvim autload directory
       file:
-        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/nvim/site/autoload'
         state: directory
         mode: 0770
     - name: Download vim-plug
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-        dest: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload/plug.vim'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.local/share/nvim/site/autoload/plug.vim'
         mode: 0660
       when: not vimplug.stat.exists
     - name: Check if vim-plug plugged directory exists
       stat:
-        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/plugged'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/nvim/plugged'
       register: vimplugged
     - name: Install vim plugins
-      command: 'vim -es -u {{ ansible_facts["env"]["HOME"] }}/.vim/vimrc -i NONE -c "PlugInstall" -c "qa"'
+      command: 'nvim --headless -c "PlugInstall" -c "qa"'
       when: not vimplugged.stat.exists
 
 - name: timewarrior plugin

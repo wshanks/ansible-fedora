@@ -25,6 +25,7 @@
       # No flatpak for tweaks
       - gnome-tweaks
       - igt-gpu-tools
+      - neovim
       - podman-compose
       # tmux in the container has trouble with terminal windows resizing and
       # makes it hard to pop up to a shell in the host
