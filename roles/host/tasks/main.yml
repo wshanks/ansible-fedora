@@ -243,7 +243,7 @@
       register: firefox_runtime
     - name: Install ffmpeg for firefox
       community.general.flatpak:
-        name: "{{ firefox_runtime.stdout|replace('org.freedesktop.Platform','runtime/org.freedesktop.Platform.ffmpeg-full')}}"
+        name: "{{ firefox_runtime.stdout|replace('org.freedesktop.Platform','runtime/org.freedesktop.Platform.codecs-extra')}}"
         remote: flathub
         state: present
     - name: Firefox flatpak as default browser
