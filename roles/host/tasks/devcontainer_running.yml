@@ -1,0 +1,12 @@
+# Host setup that requires the dev container to be running. Not included from
+# main.yml: the role only creates the container (stopped), so these tasks can
+# only run after a playbook has started it. Call with:
+#   include_role: {name: ..., tasks_from: devcontainer_running}
+- name: user services that require devcontainer
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    scope: user
+  loop:
+    - toolbox-emacs-server

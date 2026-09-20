@@ -334,18 +334,6 @@
     - localhttp
     - jupyter
 
-- name: user services that require devcontainer
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: started
-    enabled: true
-    scope: user
-  loop:
-    - toolbox-emacs-server
-  tags:
-    - devcontainer_running
-
-
 - name: Rootless docker
   block:
     - name: Create docker bin directory
