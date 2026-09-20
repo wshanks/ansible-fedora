@@ -218,7 +218,7 @@
     - name: 'Override flatpak themes'
       ansible.builtin.command:
         cmd: 'flatpak override --user --env=GTK_THEME={{ flatpak_theme }} {{ item[0].name }}'
-      when: 'item[0].get("theme") and flatpak_theme not in item[1].stdout'
+      when: 'item[0].get("theme", False) and flatpak_theme not in item[1].stdout'
       loop: "{{ flatpaks | zip(flatpak_overrides.results) | list }}"
 
 - name: Ensure KeePassXC theme is dark
