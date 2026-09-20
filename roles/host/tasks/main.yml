@@ -50,17 +50,17 @@
   block:
     - name: Ensure bin directory exists
       ansible.builtin.file:
-        path: '{{ ansible_env.HOME }}/bin'
+        path: '{{ ansible_facts["env"]["HOME"] }}/bin'
         state: directory
     - name: clone yadm
       ansible.builtin.git:
         repo: 'https://github.com/TheLocehiliosan/yadm.git'
-        dest: '{{ ansible_env.HOME }}/.local/installs/yadm'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.local/installs/yadm'
         version: master
     - name: link yadm
       ansible.builtin.file:
-        src: '{{ ansible_env.HOME }}/.local/installs/yadm/yadm'
-        dest: '{{ ansible_env.HOME }}/bin/yadm'
+        src: '{{ ansible_facts["env"]["HOME"] }}/.local/installs/yadm/yadm'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/bin/yadm'
         state: link
   tags: yadm
 
@@ -68,13 +68,13 @@
   block:
     - name: Check if yadm is already cloned
       stat:
-        path: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/yadm/repo.git'
       register: yadmrepostat
     - name: Clone yadm
       command: 'yadm clone --checkout {{ yadm_repo }}'
       when: yadm_repo is defined and yadmrepostat.stat.exists == False
       args:
-          creates: '{{ ansible_env.HOME }}/.local/share/yadm/repo.git'
+          creates: '{{ ansible_facts["env"]["HOME"] }}/.local/share/yadm/repo.git'
     - name: Reset yadm
       command: 'yadm reset --hard'
       when: yadm_repo is defined and yadmrepostat.stat.exists == False
@@ -89,21 +89,21 @@
         key: "{{ pyadm_host_key }}"
     - name: Check if pyadm is already cloned
       stat:
-        path: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm/repo.git'
       register: pyadmrepostat
     - name: Make pyadm directory
       file:
-        path: '{{ ansible_env.HOME }}/.local/share/pyadm'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm'
         state: directory
         mode: 0770
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
     - name: pyadm clone
-      command: 'yadm clone --checkout --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm --yadm-data {{ ansible_env.HOME }}/.local/share/pyadm {{ pyadm_repo }}'
+      command: 'yadm clone --checkout --yadm-dir {{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm --yadm-data {{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm {{ pyadm_repo }}'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
       args:
-        creates: '{{ ansible_env.HOME }}/.local/share/pyadm/repo.git'
+        creates: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm/repo.git'
     - name: Reset pyadm
-      command: 'yadm reset --hard --yadm-dir {{ ansible_env.HOME }}/.local/share/pyadm --yadm-data {{ ansible_env.HOME }}/.local/share/pyadm'
+      command: 'yadm reset --hard --yadm-dir {{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm --yadm-data {{ ansible_facts["env"]["HOME"] }}/.local/share/pyadm'
       when: pyadm_repo is defined and pyadmrepostat.stat.exists == False
   tags: yadm
 
@@ -222,7 +222,7 @@
 
 - name: Ensure KeePassXC theme is dark
   ansible.builtin.ini_file:
-    path: "{{ ansible_env.HOME }}/.var/org.keepassxc.KeePassXC/config/keepassxc/keepassxc.ini"
+    path: "{{ ansible_facts['env']['HOME'] }}/.var/org.keepassxc.KeePassXC/config/keepassxc/keepassxc.ini"
     section: "GUI"
     option: "ApplicationTheme"
     value: "dark"
@@ -320,7 +320,7 @@
 
     - name: Create docker plugin directory
       ansible.builtin.file:
-        path: '{{ ansible_env.HOME }}/.docker/cli-plugins'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.docker/cli-plugins'
         state: directory
         mode: u=rwx
 
@@ -347,13 +347,13 @@
 
     - name: Check if docker buildx binary already present
       stat:
-        path: '{{ ansible_env.HOME }}/.docker/cli-plugins/docker-buildx'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.docker/cli-plugins/docker-buildx'
       register: buildxstat
 
     - name: Download buildx
       ansible.builtin.get_url:
         url: https://github.com/docker/buildx/releases/download/v{{ docker_buildx_version }}/buildx-v{{ docker_buildx_version }}.linux-amd64
-        dest: '{{ ansible_env.HOME }}/.docker/cli-plugins/docker-buildx'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.docker/cli-plugins/docker-buildx'
         mode: 0750
       when: buildxstat.stat.exists == False
 
@@ -365,14 +365,14 @@
     - name: Link docker binaries into PATH
       ansible.builtin.file:
         src: '{{ item.path }}'
-        path: '{{ ansible_env.HOME }}/bin/{{ item.path | basename }}'
+        path: '{{ ansible_facts["env"]["HOME"] }}/bin/{{ item.path | basename }}'
         state: link
       loop: "{{ docker_binaries.files | selectattr('xusr') }}"
 
     - name: Install docker service
       ansible.builtin.template:
         src: docker_rootless.service.j2
-        dest: '{{ ansible_env.HOME }}/.config/systemd/user/docker_rootless.service'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.config/systemd/user/docker_rootless.service'
 
     - name: Start docker
       ansible.builtin.systemd:

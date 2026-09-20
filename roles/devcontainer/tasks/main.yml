@@ -63,7 +63,7 @@
   block:
   - name: Check mamba already installed
     stat:
-      path: '{{ ansible_env.HOME }}/.conda/bin/mamba'
+      path: '{{ ansible_facts["env"]["HOME"] }}/.conda/bin/mamba'
     register: mamba_bin
   - name: Download mamba
     get_url:
@@ -71,45 +71,45 @@
       dest: /tmp/mamba.sh
     when: mamba_bin.stat.exists == False
   - name: install mamba
-    command: 'bash /tmp/mamba.sh -b -p  {{ ansible_env.HOME }}/.conda'
+    command: 'bash /tmp/mamba.sh -b -p  {{ ansible_facts["env"]["HOME"] }}/.conda'
     args:
-      creates: '{{ ansible_env.HOME }}/.conda/bin/mamba'
+      creates: '{{ ansible_facts["env"]["HOME"] }}/.conda/bin/mamba'
     when: mamba_bin.stat.exists == False
   - name: update mamba
-    command: '{{ ansible_env.HOME }}/.conda/bin/mamba update -y mamba'
+    command: '{{ ansible_facts["env"]["HOME"] }}/.conda/bin/mamba update -y mamba'
     register: mamba_update
     changed_when: mamba_update.stdout is not search("# All requested packages already installed.")
     environment:
-      MAMBA_ROOT_PREFIX: '{{ ansible_env.HOME }}/.conda'
+      MAMBA_ROOT_PREFIX: '{{ ansible_facts["env"]["HOME"] }}/.conda'
   tags: mamba
 
 - name: pixi
   block:
   - name: Pixi home and bin directories
     file:
-      path: '{{ ansible_env.HOME }}/.local/share/pixi/bin'
+      path: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pixi/bin'
       state: directory
       mode: 0770
   - name: Download and install pixi
     unarchive:
-      src: "https://github.com/prefix-dev/pixi/releases/latest/download/pixi-{{ ansible_architecture }}-unknown-linux-musl.tar.gz"
-      dest: '{{ ansible_env.HOME }}/.local/share/pixi/bin'
+      src: "https://github.com/prefix-dev/pixi/releases/latest/download/pixi-{{ ansible_facts['architecture'] }}-unknown-linux-musl.tar.gz"
+      dest: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pixi/bin'
       remote_src: yes
-      creates: '{{ ansible_env.HOME }}/.local/share/pixi/bin/pixi'
+      creates: '{{ ansible_facts["env"]["HOME"] }}/.local/share/pixi/bin/pixi'
   - name: Sync pixi tools
     ansible.builtin.command:
       cmd: "pixi global sync"
-      creates: "{{ ansible_env.HOME }}/.local/share/pixi/envs"
+      creates: "{{ ansible_facts['env']['HOME'] }}/.local/share/pixi/envs"
   tags: pixi
 
 - name: npm
   block:
   - name: Set user npm prefix
     ini_file:
-      path: '{{ ansible_env.HOME }}/.npmrc'
+      path: '{{ ansible_facts["env"]["HOME"] }}/.npmrc'
       section: null
       option: prefix
-      value: '{{ ansible_env.HOME }}/.local/share/npm'
+      value: '{{ ansible_facts["env"]["HOME"] }}/.local/share/npm'
       mode: 0770
       no_extra_spaces: yes
   - name: Install npm modules
@@ -124,36 +124,36 @@
   block:
     - name: Check if vim-plug is installed
       stat:
-        path: '{{ ansible_env.HOME }}/.vim/autoload/plug.vim'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload/plug.vim'
       register: vimplug
     - name: Create vim autload directory
       file:
-        path: '{{ ansible_env.HOME }}/.vim/autoload'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload'
         state: directory
         mode: 0770
     - name: Download vim-plug
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-        dest: '{{ ansible_env.HOME }}/.vim/autoload/plug.vim'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.vim/autoload/plug.vim'
         mode: 0660
       when: not vimplug.stat.exists
     - name: Check if vim-plug plugged directory exists
       stat:
-        path: '{{ ansible_env.HOME }}/.vim/plugged'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.vim/plugged'
       register: vimplugged
     - name: Install vim plugins
-      command: 'vim -es -u {{ ansible_env.HOME }}/.vim/vimrc -i NONE -c "PlugInstall" -c "qa"'
+      command: 'vim -es -u {{ ansible_facts["env"]["HOME"] }}/.vim/vimrc -i NONE -c "PlugInstall" -c "qa"'
       when: not vimplugged.stat.exists
 
 - name: timewarrior plugin
   block:
     - name: Make timewarrior directories
       ansible.builtin.file:
-        path: '{{ ansible_env.HOME }}/.timewarrior/weekly'
+        path: '{{ ansible_facts["env"]["HOME"] }}/.timewarrior/weekly'
         mode: '0750'
         state: directory
     - name: Get timewarrior extension
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/wshanks/timewarrior-weekly/master/weekly.py
-        dest: '{{ ansible_env.HOME }}/.timewarrior/extensions/weekly.py'
+        dest: '{{ ansible_facts["env"]["HOME"] }}/.timewarrior/extensions/weekly.py'
         mode: '0750'
