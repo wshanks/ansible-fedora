@@ -31,15 +31,6 @@
       - tmux
     state: latest
 
-- name: Unneeded packages
-  become: yes
-  become_method: sudo
-  dnf:
-    name:
-    - gnome-shell-extension-appindicator
-    - gnome-shell-extension-background-logo
-    state: absent
-
 - name: dnf cleanup
   become: yes
   become_method: sudo
