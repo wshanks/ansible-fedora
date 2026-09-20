@@ -167,8 +167,9 @@
     - name: Install font
       ansible.builtin.unarchive:
         src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/AdwaitaMono.tar.xz
+        remote_src: yes
         dest: /usr/local/share/fonts
-        creates: /usr/loca/share/fonts/AdwaitaMonoNerdFontMono-Regular.ttf
+        creates: /usr/local/share/fonts/AdwaitaMonoNerdFontMono-Regular.ttf
       become: yes
       become_method: sudo
 
