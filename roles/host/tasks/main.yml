@@ -254,6 +254,50 @@
       # Could put more arguments here, but defaulting to the host Fedora version is fine
       ansible.builtin.command: 'toolbox --assumeyes create {{ devcontainer_name }}'
       when: devcontainer_status.rc != 0
+    # toolbox creates the user with no /etc/shadow entry, so sudo inside the
+    # container authenticates via pam_unix nullok against an empty password.
+    # That works interactively but not under `sudo -n`, which refuses to
+    # authenticate at all -- so the devcontainer role's `become` tasks fail
+    # without this. podman exec needs the container running, and
+    # `toolbox create` leaves it stopped.
+    - name: Start dev container
+      containers.podman.podman_container:
+        name: '{{ devcontainer_name }}'
+        state: started
+      when: devcontainer_status.rc != 0
+    - name: Allow passwordless sudo in dev container
+      ansible.builtin.command:
+        argv:
+          - podman
+          - exec
+          - --user
+          - root
+          - '{{ devcontainer_name }}'
+          - sh
+          - -c
+          - >-
+            echo '%wheel ALL=(ALL) NOPASSWD: ALL'
+            > /etc/sudoers.d/99-ansible-nopasswd
+            && chmod 0440 /etc/sudoers.d/99-ansible-nopasswd
+      when: devcontainer_status.rc != 0
+      changed_when: true
+    - name: Pre-create root ansible tmp dir in dev container
+      # This suppresses a warning about needing to create the directory and the
+      # permissions possibly being wrong for tasks run sa other users.
+      ansible.builtin.command:
+        argv:
+          - podman
+          - exec
+          - --user
+          - root
+          - '{{ devcontainer_name }}'
+          - mkdir
+          - -p
+          - /root/.ansible/tmp
+      when: devcontainer_status.rc != 0
+      changed_when: true
+
+
 
 # - name: Set up gnome settings
 - name: dark theme
