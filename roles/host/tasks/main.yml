@@ -188,6 +188,7 @@
           - name: org.libreoffice.LibreOffice
           - name: org.zotero.Zotero
             theme: true
+          - name: org.mozilla.thunderbird
           - name: org.gnome.Extensions
           - name: org.pulseaudio.pavucontrol
             theme: true
